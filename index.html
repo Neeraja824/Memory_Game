@@ -9,37 +9,53 @@
 <body>
     <div class="container">
         <h2>Memory Game</h2>
+        <div class="stats">
+            <span>Moves: <b id="move-count">0</b></span>
+            <span>Time: <b id="timer">0s</b></span>
+        </div>
         <div class="game"></div>
         <button class="reset" onclick="window.location.reload();">Reset Game</button>
     </div>
     <script>
         const emojis = ["😀", "😀", "😂", "😂", "😍", "😍", "🥰", "🥰", "😎", "😎", "🤩", "🤩", "🥳", "🥳", "😜", "😜"];
         var shuf_emojis = emojis.sort(() => (Math.random() > 0.5) ? 1 : -1);
-        
-        for(var i = 0; i < emojis.length; i++) {
+        let moves = 0;
+        let seconds = 0;
+        let timerInterval = null;
+        let gameStarted = false;
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                document.getElementById('timer').innerHTML = seconds + "s";
+            }, 1000);
+        }
+        for (var i = 0; i < emojis.length; i++) {
             let box = document.createElement('div');
             box.className = 'item';
             box.innerHTML = shuf_emojis[i];
-            
-            box.onclick = function() {
-                if(this.classList.contains('boxOpen') || this.classList.contains('boxMatch')) {
+            box.onclick = function () {
+                if (this.classList.contains('boxOpen') || this.classList.contains('boxMatch')) {
                     return;
                 }
-                
+                if (!gameStarted) {
+                    gameStarted = true;
+                    startTimer();
+                }
                 this.classList.add('boxOpen');
-                
-                setTimeout(function() {
+                setTimeout(function () {
                     let openBoxes = document.querySelectorAll('.boxOpen');
-                    if(openBoxes.length > 1) {
-                        if(openBoxes[0].innerHTML == openBoxes[1].innerHTML) {
+                    if (openBoxes.length > 1) {
+                        moves++;
+                        document.getElementById('move-count').innerHTML = moves;
+                        if (openBoxes[0].innerHTML == openBoxes[1].innerHTML) {
                             openBoxes[0].classList.add('boxMatch');
                             openBoxes[1].classList.add('boxMatch');
                             openBoxes[0].classList.remove('boxOpen');
                             openBoxes[1].classList.remove('boxOpen');
-                            
-                            if(document.querySelectorAll('.boxMatch').length == emojis.length) {
-                                setTimeout(function() {
-                                    alert('Congratulations! You have matched all the emojis!');
+                            if (document.querySelectorAll('.boxMatch').length == emojis.length) {
+                                clearInterval(timerInterval);
+                                setTimeout(function () {
+                                    alert('Congratulations! You finished in ' + moves + ' moves and ' + seconds + ' seconds!');
                                 }, 100);
                             }
                         } else {
@@ -49,7 +65,6 @@
                     }
                 }, 500);
             }
-            
             document.querySelector('.game').appendChild(box);
         }
     </script>
